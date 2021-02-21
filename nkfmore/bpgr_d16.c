@@ -57,7 +57,7 @@ static int line_count;
 static int char_count;
 
 static U16 conseg;
-static U8FP *conbuf;
+static U8FP conbuf;
 
 typedef int (*func_i_pipi)(int *, int *);
 typedef int (*func_i_i)(int);
