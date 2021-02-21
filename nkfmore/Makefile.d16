@@ -1,0 +1,71 @@
+#
+# Makefile for nkfmore to build 16bit DOS executable with OpenWatcom
+#
+# to build:
+#   wmake -h -f Makefile.d16
+#
+
+.ERASE
+
+!ifdef __UNIX__
+D=/
+!else
+D=\
+
+!endif
+
+A=lib
+O=obj
+X=.exe
+RM=rm -f
+COMPRESS=upx --best --8086 --no-color
+#COMPRESS=@%null upx --best --8086 --no-color
+
+
+#
+# options:
+# -zq   quiet
+# -s    do not check stack overflow
+# -os   optimize for size
+# -Fe   specify the executable file name
+# -Fo   specify the object file name
+# -Fr   (do not produce) *.err when error
+# -ml   memory model: large mode
+# -zt   set data threshold
+# -k    set stack length
+# -zk0  encoding of charset: CP932 Japanese
+#
+CC=*wcl
+CFLAGS=-zq -s -os -Fr -I. -I.. -ml -zk0 -k4096 -DMSDOS -DDEFAULT_CODE_WINDOWS_31J
+CFLAGS_UTF8TBL=$(CFLAGS) -zt64
+
+NKF_PATH=..
+nkfmore_depends = config.h bitpager.h $(NKF_PATH)$(D)nkf.h $(NKF_PATH)$(D)utf8tbl.h $(__MAKEFILES__)
+
+nkfm_d16$(X): nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
+	$(CC) $(CFLAGS) -Fe=$^@ nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
+	$(COMPRESS) $^@
+
+nkfm_d16.$(O): nkfmore.c $(NKF_PATH)$(D)nkf.c $(nkfmore_depends)
+	$(CC) -c $(CFLAGS) -Fo=$^@ $[@
+
+u8tb_d16.$(O) : $(NKF_PATH)$(D)utf8tbl.c $(nkfmore_depends)
+	$(CC) -c $(CFLAGS_UTF8TBL) -Fo=$^@ $[@
+
+bpgr_d16.$(O) : bpgr_d16.c bitpager.h
+	$(CC) -c $(CFLAGS) -Fo=$^@ $[@
+
+
+clean: .SYMBOLIC
+	-$(RM) nkfm_d16$(X) nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
+	-$(RM) bp_d16t$(X) bp_d16t.$(O)
+
+# test
+pager: bp_d16t$(X)
+
+bp_d16t$(X) : bp_d16t.$(O)
+	$(CC) $(CFLAGS) -Fe=$^@ -DTEST bp_d16t.$(O)
+
+bp_d16t.$(O) : bpgr_d16.c bitpager.h
+	$(CC) $(CFLAGS) -Fo=$^@ -DTEST bpgr_d16.c
+
