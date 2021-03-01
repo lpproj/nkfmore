@@ -4,6 +4,8 @@
 *.err
 *.EXE
 *.exe
+*.LST
+*.lst
 *.O
 *.o
 *.OBJ
