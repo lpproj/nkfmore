@@ -2,7 +2,7 @@
 # Makefile for nkfmore to build 16bit DOS executable with OpenWatcom
 #
 # to build:
-#   wmake -h -f Makefile.d16
+#   wmake -h -f Makefile.wc
 #
 
 .ERASE
@@ -21,6 +21,8 @@ RM=rm -f
 COMPRESS=upx --best --8086 --no-color
 #COMPRESS=@%null upx --best --8086 --no-color
 
+NKFMORE_PATH=..
+NKF_PATH=..$(D)..
 
 #
 # options:
@@ -35,29 +37,35 @@ COMPRESS=upx --best --8086 --no-color
 # -k    set stack length
 # -zk0  encoding of charset: CP932 Japanese
 #
-CC=*wcl
-CFLAGS=-zq -s -os -Fr -I. -I.. -ml -zk0 -k4096 -DMSDOS -DDEFAULT_CODE_WINDOWS_31J
+CC=wcl
+CFLAGS=-zq -s -os -ml -zk0 -k4096 -Fr -I. -I$(NKFMORE_PATH) -I$(NKF_PATH) -DMSDOS -DDEFAULT_CODE_WINDOWS_31J
 CFLAGS_UTF8TBL=$(CFLAGS) -zt64
 
-NKF_PATH=..
-nkfmore_depends = config.h bitpager.h $(NKF_PATH)$(D)nkf.h $(NKF_PATH)$(D)utf8tbl.h $(__MAKEFILES__)
+nkfmore_depends = config.h $(NKFMORE_PATH)$(D)bitpager.h $(NKF_PATH)$(D)nkf.h $(NKF_PATH)$(D)utf8tbl.h $(__MAKEFILES__)
 
-nkfm_d16$(X): nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
-	$(CC) $(CFLAGS) -Fe=$^@ nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
+
+all: nkf$(X) more.com
+
+nkf$(X): nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
+	*$(CC) $(CFLAGS) -Fe=$^@ nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
 	$(COMPRESS) $^@
 
-nkfm_d16.$(O): nkfmore.c $(NKF_PATH)$(D)nkf.c $(nkfmore_depends)
-	$(CC) -c $(CFLAGS) -Fo=$^@ $[@
+nkfm_d16.$(O): $(NKFMORE_PATH)$(D)nkfmore.c $(NKF_PATH)$(D)nkf.c $(nkfmore_depends)
+	*$(CC) -c $(CFLAGS) -Fo=$^@ $[@
 
 u8tb_d16.$(O) : $(NKF_PATH)$(D)utf8tbl.c $(nkfmore_depends)
-	$(CC) -c $(CFLAGS_UTF8TBL) -Fo=$^@ $[@
+	*$(CC) -c $(CFLAGS_UTF8TBL) -Fo=$^@ $[@
 
-bpgr_d16.$(O) : bpgr_d16.c bitpager.h
-	$(CC) -c $(CFLAGS) -Fo=$^@ $[@
+bpgr_d16.$(O) : bpgr_d16.c $(NKFMORE_PATH)$(D)bitpager.h
+	*$(CC) -c $(CFLAGS) -Fo=$^@ $[@
 
+more.com: more.asm
+	nasm -f bin -o $^@ $[@ -l $*.lst
 
 clean: .SYMBOLIC
-	-$(RM) nkfm_d16$(X) nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
+	-$(RM) nkf$(X) nkf
+	-$(RM) more.com more.lst
+	-$(RM) nkfm_d16.$(O) u8tb_d16.$(O) bpgr_d16.$(O)
 	-$(RM) bp_d16t$(X) bp_d16t.$(O)
 
 # test
