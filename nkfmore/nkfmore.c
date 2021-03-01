@@ -3,7 +3,7 @@
 #include <limits.h>     /* INT_MAX */
 #include <stdio.h>      /* putchar */
 
-#define NKFMORE_REVISION "rev-20210220"
+#define NKFMORE_REVISION "rev-20210301"
 
 static int fallback_putchar(int c)
 {
@@ -33,7 +33,7 @@ static void nkfmore_usage(void)
 {
     usage();
     if (help_nkfmore) {
-        fprintf(HELP_OUTPUT, "NKFMORE " NKFMORE_REVISION " (built at " __DATE__ ")\n");
+        fprintf(HELP_OUTPUT, "NKFMORE " NKFMORE_REVISION " (for %s, built at " __DATE__ ")\n", pgr_platform());
         fprintf(HELP_OUTPUT, " --more                 Simple pager mode\n");
     }
 }

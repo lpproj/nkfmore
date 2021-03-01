@@ -98,6 +98,12 @@ static int put_prompt_ibmpc(int do_erase);
     common interface funcs
   ------------------------------------------------------------*/
 
+const char *pgr_platform(void)
+{
+    return "NEC98/IBMPC";
+}
+
+
 int pgr_isterm(void)
 {
     /* check if stdout is connected to "CON" */

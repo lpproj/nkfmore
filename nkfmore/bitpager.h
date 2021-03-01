@@ -41,6 +41,7 @@ int pgr_isaborted(void);
 int pgr_termsize(int *p_columns, int *p_rows);
 int pgr_getxy(int *p_x, int *p_y);
 
+const char *pgr_platform(void);
 
 #ifdef __cplusplus
 }
